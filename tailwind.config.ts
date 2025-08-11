@@ -68,7 +68,7 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
-			keyframes: {
+keyframes: {
 				'accordion-down': {
 					from: {
 						height: '0'
@@ -84,11 +84,22 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+          float: {
+            '0%': { transform: 'translateY(0px)' },
+            '50%': { transform: 'translateY(-6px)' },
+            '100%': { transform: 'translateY(0px)' }
+          },
+          'glow-pulse': {
+            '0%,100%': { boxShadow: 'var(--shadow-elegant)' },
+            '50%': { boxShadow: 'var(--shadow-glow)' }
+          }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+          float: 'float 6s ease-in-out infinite',
+          'glow-pulse': 'glow-pulse 3s ease-in-out infinite'
 			}
 		}
 	},
