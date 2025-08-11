@@ -44,7 +44,7 @@ npm run dev
 
 **Use GitHub Codespaces**
 
-- Navigate to the main page of your repository.
+- Navigate to the main page of your repo.
 - Click on the "Code" button (green button) near the top right.
 - Select the "Codespaces" tab.
 - Click on "New codespace" to launch a new Codespace environment.
