@@ -26,7 +26,7 @@ const relationships = [
   'Other'
 ];
 
-export const GuardianInfoStep: React.FC<GuardianInfoStepProps> = ({ data, updateData }) => {
+export const GuardianInfoStep: React.FC<GuardianInfoStepProps> = ({ data, updateData, errors }) => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Primary Guardian */}
