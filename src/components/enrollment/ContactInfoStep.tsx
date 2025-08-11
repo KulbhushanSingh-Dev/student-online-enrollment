@@ -9,6 +9,7 @@ import { MapPin, Phone } from 'lucide-react';
 interface ContactInfoStepProps {
   data: EnrollmentData;
   updateData: (data: Partial<EnrollmentData>) => void;
+  errors?: Record<string, string>;
 }
 
 const states = [
@@ -35,7 +36,7 @@ const emergencyRelationships = [
   'Other'
 ];
 
-export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({ data, updateData }) => {
+export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({ data, updateData, errors }) => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Address Information */}
@@ -60,6 +61,9 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({ data, updateDa
               placeholder="123 Main Street"
               required
             />
+            {errors?.streetAddress && (
+              <p className="text-sm text-destructive mt-1">{errors.streetAddress}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -76,6 +80,9 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({ data, updateDa
                 placeholder="City name"
                 required
               />
+              {errors?.city && (
+                <p className="text-sm text-destructive mt-1">{errors.city}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -97,6 +104,9 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({ data, updateDa
                   ))}
                 </SelectContent>
               </Select>
+              {errors?.state && (
+                <p className="text-sm text-destructive mt-1">{errors.state}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -113,6 +123,9 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({ data, updateDa
                 maxLength={10}
                 required
               />
+              {errors?.postalCode && (
+                <p className="text-sm text-destructive mt-1">{errors.postalCode}</p>
+              )}
             </div>
           </div>
         </CardContent>
@@ -140,6 +153,9 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({ data, updateDa
               placeholder="Emergency contact full name"
               required
             />
+            {errors?.emergencyContactName && (
+              <p className="text-sm text-destructive mt-1">{errors.emergencyContactName}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -156,6 +172,9 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({ data, updateDa
                 placeholder="(555) 123-4567"
                 required
               />
+              {errors?.emergencyContactPhone && (
+                <p className="text-sm text-destructive mt-1">{errors.emergencyContactPhone}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -177,11 +196,66 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({ data, updateDa
                   ))}
                 </SelectContent>
               </Select>
+              {errors?.emergencyContactRelationship && (
+                <p className="text-sm text-destructive mt-1">{errors.emergencyContactRelationship}</p>
+              )}
             </div>
           </div>
 
           <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
             <strong>Note:</strong> This person will be contacted in case of emergencies when primary guardians are not available.
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Additional Contact Details */}
+      <Card className="border border-muted/40 bg-gradient-card">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">Additional Contact Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="secondaryPhoneNumber" className="text-sm font-medium">
+                Secondary Phone Number
+              </Label>
+              <Input
+                id="secondaryPhoneNumber"
+                type="tel"
+                value={data.secondaryPhoneNumber}
+                onChange={(e) => updateData({ secondaryPhoneNumber: e.target.value })}
+                className="transition-smooth focus:shadow-button"
+                placeholder="(555) 987-6543"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contactAlternateEmail" className="text-sm font-medium">
+                Alternate Email
+              </Label>
+              <Input
+                id="contactAlternateEmail"
+                type="email"
+                value={data.contactAlternateEmail}
+                onChange={(e) => updateData({ contactAlternateEmail: e.target.value })}
+                className="transition-smooth focus:shadow-button"
+                placeholder="household.alt@example.com"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="linkedInProfile" className="text-sm font-medium">
+              LinkedIn Profile
+            </Label>
+            <Input
+              id="linkedInProfile"
+              type="url"
+              value={data.linkedInProfile}
+              onChange={(e) => updateData({ linkedInProfile: e.target.value })}
+              className="transition-smooth focus:shadow-button"
+              placeholder="https://www.linkedin.com/in/username"
+            />
           </div>
         </CardContent>
       </Card>

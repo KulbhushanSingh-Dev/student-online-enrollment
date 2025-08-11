@@ -13,15 +13,20 @@ import { useToast } from '@/hooks/use-toast';
 export interface EnrollmentData {
   // Student Information
   studentFirstName: string;
+  studentMiddleName: string;
   studentLastName: string;
+  studentPreferredNickname: string;
   studentDateOfBirth: string;
   studentGrade: string;
+  studentAlternateEmail: string;
   
   // Guardian Information
   primaryGuardianFirstName: string;
+  primaryGuardianMiddleName: string;
   primaryGuardianLastName: string;
   primaryGuardianRelationship: string;
   primaryGuardianEmail: string;
+  primaryGuardianAlternateEmail: string;
   primaryGuardianPhone: string;
   
   // Secondary Guardian (optional)
@@ -37,6 +42,9 @@ export interface EnrollmentData {
   city: string;
   state: string;
   postalCode: string;
+  secondaryPhoneNumber: string;
+  linkedInProfile: string;
+  contactAlternateEmail: string;
   emergencyContactName: string;
   emergencyContactPhone: string;
   emergencyContactRelationship: string;
@@ -48,13 +56,18 @@ export interface EnrollmentData {
 
 const initialData: EnrollmentData = {
   studentFirstName: '',
+  studentMiddleName: '',
   studentLastName: '',
+  studentPreferredNickname: '',
   studentDateOfBirth: '',
   studentGrade: '',
+  studentAlternateEmail: '',
   primaryGuardianFirstName: '',
+  primaryGuardianMiddleName: '',
   primaryGuardianLastName: '',
   primaryGuardianRelationship: '',
   primaryGuardianEmail: '',
+  primaryGuardianAlternateEmail: '',
   primaryGuardianPhone: '',
   hasSecondaryGuardian: false,
   secondaryGuardianFirstName: '',
@@ -66,6 +79,9 @@ const initialData: EnrollmentData = {
   city: '',
   state: '',
   postalCode: '',
+  secondaryPhoneNumber: '',
+  linkedInProfile: '',
+  contactAlternateEmail: '',
   emergencyContactName: '',
   emergencyContactPhone: '',
   emergencyContactRelationship: '',
@@ -84,6 +100,7 @@ export const EnrollmentForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<EnrollmentData>(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
 
@@ -129,8 +146,58 @@ export const EnrollmentForm: React.FC = () => {
     setData(prev => ({ ...prev, ...stepData }));
   };
 
+  const isEmailValid = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPhoneValid = (phone: string) => phone.replace(/\D/g, '').length >= 7;
+
+  const validateCurrentStep = () => {
+    const stepErrors: Record<string, string> = {};
+
+    switch (currentStep) {
+      case 0: {
+        if (!data.studentFirstName.trim()) stepErrors.studentFirstName = 'First name is required';
+        if (!data.studentLastName.trim()) stepErrors.studentLastName = 'Last name is required';
+        if (!data.studentDateOfBirth) stepErrors.studentDateOfBirth = 'Date of birth is required';
+        else {
+          const d = new Date(data.studentDateOfBirth);
+          if (isNaN(d.getTime())) stepErrors.studentDateOfBirth = 'Enter a valid date';
+        }
+        if (!data.studentGrade) stepErrors.studentGrade = 'Grade level is required';
+        break;
+      }
+      case 1: {
+        if (!data.primaryGuardianFirstName.trim()) stepErrors.primaryGuardianFirstName = 'First name is required';
+        if (!data.primaryGuardianLastName.trim()) stepErrors.primaryGuardianLastName = 'Last name is required';
+        if (!data.primaryGuardianRelationship) stepErrors.primaryGuardianRelationship = 'Relationship is required';
+        if (!data.primaryGuardianEmail.trim()) stepErrors.primaryGuardianEmail = 'Email is required';
+        else if (!isEmailValid(data.primaryGuardianEmail)) stepErrors.primaryGuardianEmail = 'Enter a valid email address';
+        if (!data.primaryGuardianPhone.trim()) stepErrors.primaryGuardianPhone = 'Phone number is required';
+        else if (!isPhoneValid(data.primaryGuardianPhone)) stepErrors.primaryGuardianPhone = 'Enter a valid phone number';
+
+        if (data.parentalConsentRequired && !data.parentalConsentGiven) {
+          stepErrors.parentalConsentGiven = 'Parental consent is required';
+        }
+        break;
+      }
+      case 2: {
+        if (!data.streetAddress.trim()) stepErrors.streetAddress = 'Street address is required';
+        if (!data.city.trim()) stepErrors.city = 'City is required';
+        if (!data.state) stepErrors.state = 'State is required';
+        if (!data.postalCode.trim()) stepErrors.postalCode = 'ZIP code is required';
+        if (!data.emergencyContactName.trim()) stepErrors.emergencyContactName = 'Emergency contact name is required';
+        if (!data.emergencyContactPhone.trim()) stepErrors.emergencyContactPhone = 'Emergency contact phone is required';
+        else if (!isPhoneValid(data.emergencyContactPhone)) stepErrors.emergencyContactPhone = 'Enter a valid phone number';
+        if (!data.emergencyContactRelationship) stepErrors.emergencyContactRelationship = 'Relationship is required';
+        break;
+      }
+    }
+
+    setErrors(stepErrors);
+    return Object.keys(stepErrors).length === 0;
+  };
+
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
+      if (!validateCurrentStep()) return;
       setCurrentStep(currentStep + 1);
     }
   };
@@ -211,11 +278,11 @@ export const EnrollmentForm: React.FC = () => {
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <StudentInfoStep data={data} updateData={updateData} />;
+        return <StudentInfoStep data={data} updateData={updateData} errors={errors} />;
       case 1:
-        return <GuardianInfoStep data={data} updateData={updateData} />;
+        return <GuardianInfoStep data={data} updateData={updateData} errors={errors} />;
       case 2:
-        return <ContactInfoStep data={data} updateData={updateData} />;
+        return <ContactInfoStep data={data} updateData={updateData} errors={errors} />;
       case 3:
         return <ConfirmationStep data={data} onSubmit={submitApplication} isSubmitting={isSubmitting} />;
       default:

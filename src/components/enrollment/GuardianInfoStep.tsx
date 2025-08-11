@@ -10,6 +10,7 @@ import { Users, User } from 'lucide-react';
 interface GuardianInfoStepProps {
   data: EnrollmentData;
   updateData: (data: Partial<EnrollmentData>) => void;
+  errors?: Record<string, string>;
 }
 
 const relationships = [
@@ -51,6 +52,9 @@ export const GuardianInfoStep: React.FC<GuardianInfoStepProps> = ({ data, update
                 placeholder="Guardian's first name"
                 required
               />
+              {errors?.primaryGuardianFirstName && (
+                <p className="text-sm text-destructive mt-1">{errors.primaryGuardianFirstName}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -65,6 +69,25 @@ export const GuardianInfoStep: React.FC<GuardianInfoStepProps> = ({ data, update
                 className="transition-smooth focus:shadow-button"
                 placeholder="Guardian's last name"
                 required
+              />
+              {errors?.primaryGuardianLastName && (
+                <p className="text-sm text-destructive mt-1">{errors.primaryGuardianLastName}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="primaryGuardianMiddleName" className="text-sm font-medium">
+                Middle Name
+              </Label>
+              <Input
+                id="primaryGuardianMiddleName"
+                type="text"
+                value={data.primaryGuardianMiddleName}
+                onChange={(e) => updateData({ primaryGuardianMiddleName: e.target.value })}
+                className="transition-smooth focus:shadow-button"
+                placeholder="Guardian's middle name (optional)"
               />
             </div>
           </div>
@@ -88,6 +111,9 @@ export const GuardianInfoStep: React.FC<GuardianInfoStepProps> = ({ data, update
                 ))}
               </SelectContent>
             </Select>
+            {errors?.primaryGuardianRelationship && (
+              <p className="text-sm text-destructive mt-1">{errors.primaryGuardianRelationship}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -104,22 +130,42 @@ export const GuardianInfoStep: React.FC<GuardianInfoStepProps> = ({ data, update
                 placeholder="guardian@example.com"
                 required
               />
+              {errors?.primaryGuardianEmail && (
+                <p className="text-sm text-destructive mt-1">{errors.primaryGuardianEmail}</p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="primaryGuardianPhone" className="text-sm font-medium">
-                Phone Number *
+              <Label htmlFor="primaryGuardianAlternateEmail" className="text-sm font-medium">
+                Alternate Email
               </Label>
               <Input
-                id="primaryGuardianPhone"
-                type="tel"
-                value={data.primaryGuardianPhone}
-                onChange={(e) => updateData({ primaryGuardianPhone: e.target.value })}
+                id="primaryGuardianAlternateEmail"
+                type="email"
+                value={data.primaryGuardianAlternateEmail}
+                onChange={(e) => updateData({ primaryGuardianAlternateEmail: e.target.value })}
                 className="transition-smooth focus:shadow-button"
-                placeholder="(555) 123-4567"
-                required
+                placeholder="guardian.alt@example.com"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="primaryGuardianPhone" className="text-sm font-medium">
+              Phone Number *
+            </Label>
+            <Input
+              id="primaryGuardianPhone"
+              type="tel"
+              value={data.primaryGuardianPhone}
+              onChange={(e) => updateData({ primaryGuardianPhone: e.target.value })}
+              className="transition-smooth focus:shadow-button"
+              placeholder="(555) 123-4567"
+              required
+            />
+            {errors?.primaryGuardianPhone && (
+              <p className="text-sm text-destructive mt-1">{errors.primaryGuardianPhone}</p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -235,15 +281,20 @@ export const GuardianInfoStep: React.FC<GuardianInfoStepProps> = ({ data, update
       {data.parentalConsentRequired && (
         <Card className="border border-education-warning/20 bg-education-warning/5 animate-slide-in">
           <CardContent className="pt-6">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-start space-x-3">
               <Checkbox
                 id="parentalConsentGiven"
                 checked={data.parentalConsentGiven}
                 onCheckedChange={(checked) => updateData({ parentalConsentGiven: checked as boolean })}
               />
-              <Label htmlFor="parentalConsentGiven" className="text-sm cursor-pointer">
-                I give consent for my child to enroll in this educational institution and understand the terms and conditions.
-              </Label>
+              <div>
+                <Label htmlFor="parentalConsentGiven" className="text-sm cursor-pointer">
+                  I give consent for my child to enroll in this educational institution and understand the terms and conditions.
+                </Label>
+                {errors?.parentalConsentGiven && (
+                  <p className="text-sm text-destructive mt-2">{errors.parentalConsentGiven}</p>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -7,6 +7,7 @@ import { EnrollmentData } from '../EnrollmentForm';
 interface StudentInfoStepProps {
   data: EnrollmentData;
   updateData: (data: Partial<EnrollmentData>) => void;
+  errors?: Record<string, string>;
 }
 
 const grades = [
@@ -26,7 +27,7 @@ const grades = [
   '12th Grade',
 ];
 
-export const StudentInfoStep: React.FC<StudentInfoStepProps> = ({ data, updateData }) => {
+export const StudentInfoStep: React.FC<StudentInfoStepProps> = ({ data, updateData, errors }) => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -43,6 +44,9 @@ export const StudentInfoStep: React.FC<StudentInfoStepProps> = ({ data, updateDa
             placeholder="Enter student's first name"
             required
           />
+          {errors?.studentFirstName && (
+            <p className="text-sm text-destructive mt-1">{errors.studentFirstName}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -57,6 +61,39 @@ export const StudentInfoStep: React.FC<StudentInfoStepProps> = ({ data, updateDa
             className="transition-smooth focus:shadow-button"
             placeholder="Enter student's last name"
             required
+          />
+          {errors?.studentLastName && (
+            <p className="text-sm text-destructive mt-1">{errors.studentLastName}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="studentMiddleName" className="text-sm font-medium">
+            Middle Name
+          </Label>
+          <Input
+            id="studentMiddleName"
+            type="text"
+            value={data.studentMiddleName}
+            onChange={(e) => updateData({ studentMiddleName: e.target.value })}
+            className="transition-smooth focus:shadow-button"
+            placeholder="Enter student's middle name (optional)"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="studentPreferredNickname" className="text-sm font-medium">
+            Preferred Nickname
+          </Label>
+          <Input
+            id="studentPreferredNickname"
+            type="text"
+            value={data.studentPreferredNickname}
+            onChange={(e) => updateData({ studentPreferredNickname: e.target.value })}
+            className="transition-smooth focus:shadow-button"
+            placeholder="Enter preferred nickname (optional)"
           />
         </div>
       </div>
@@ -74,6 +111,9 @@ export const StudentInfoStep: React.FC<StudentInfoStepProps> = ({ data, updateDa
             className="transition-smooth focus:shadow-button"
             required
           />
+          {errors?.studentDateOfBirth && (
+            <p className="text-sm text-destructive mt-1">{errors.studentDateOfBirth}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -95,7 +135,24 @@ export const StudentInfoStep: React.FC<StudentInfoStepProps> = ({ data, updateDa
               ))}
             </SelectContent>
           </Select>
+          {errors?.studentGrade && (
+            <p className="text-sm text-destructive mt-1">{errors.studentGrade}</p>
+          )}
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="studentAlternateEmail" className="text-sm font-medium">
+          Alternate Email
+        </Label>
+        <Input
+          id="studentAlternateEmail"
+          type="email"
+          value={data.studentAlternateEmail}
+          onChange={(e) => updateData({ studentAlternateEmail: e.target.value })}
+          className="transition-smooth focus:shadow-button"
+          placeholder="student.alt@example.com"
+        />
       </div>
 
       {data.parentalConsentRequired && (
