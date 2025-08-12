@@ -81,7 +81,7 @@ export type Database = {
           student_grade: string
           student_last_name: string
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           application_status?: string
@@ -111,7 +111,7 @@ export type Database = {
           student_grade: string
           student_last_name: string
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           application_status?: string
@@ -141,7 +141,7 @@ export type Database = {
           student_grade?: string
           student_last_name?: string
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
