@@ -117,26 +117,30 @@ export const EnrollmentForm: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-// Calculate student age and determine if parental consent is required
-useEffect(() => {
-  if (data.studentDateOfBirth) {
-    const birthDate = new Date(data.studentDateOfBirth);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age -= 1;
+  // Calculate student age and determine if parental consent is required
+  useEffect(() => {
+    if (data.studentDateOfBirth) {
+      const birthDate = new Date(data.studentDateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        const actualAge = age - 1;
+        setData(prev => ({ 
+          ...prev, 
+          parentalConsentRequired: actualAge < 13,
+          parentalConsentGiven: actualAge >= 13 ? true : prev.parentalConsentGiven
+        }));
+      } else {
+        setData(prev => ({ 
+          ...prev, 
+          parentalConsentRequired: age < 13,
+          parentalConsentGiven: age >= 13 ? true : prev.parentalConsentGiven
+        }));
+      }
     }
-
-    const requiresConsent = age < 18;
-    setData(prev => ({
-      ...prev,
-      parentalConsentRequired: requiresConsent,
-      // Adults: mark consent as given to avoid UI friction; Minors: keep as-is until provided
-      parentalConsentGiven: requiresConsent ? prev.parentalConsentGiven : true,
-    }));
-  }
-}, [data.studentDateOfBirth]);
+  }, [data.studentDateOfBirth]);
 
   const updateData = (stepData: Partial<EnrollmentData>) => {
     setData(prev => ({ ...prev, ...stepData }));

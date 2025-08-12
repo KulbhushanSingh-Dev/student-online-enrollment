@@ -67,51 +67,36 @@ ChartContainer.displayName = "Chart"
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
-    ([_, cfg]) => cfg.theme || cfg.color
+    ([_, config]) => config.theme || config.color
   )
 
   if (!colorConfig.length) {
     return null
   }
 
-  const sanitizeColor = (value?: string) => {
-    if (!value) return undefined
-    const safe = value.trim()
-    const hex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
-    const rgb = /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/
-    const rgba = /^rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*(0|0?\.\d+|1)\s*\)$/
-    const hsl = /^hsl\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*\)$/
-    const hsla = /^hsla\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*,\s*(0|0?\.\d+|1)\s*\)$/
-    const cssVar = /^var\(--[a-zA-Z0-9_-]+\)$/
-    if (hex.test(safe) || rgb.test(safe) || rgba.test(safe) || hsl.test(safe) || hsla.test(safe) || cssVar.test(safe)) {
-      return safe
-    }
-    return undefined
-  }
-
-  const styleContent = Object.entries(THEMES)
-    .map(([theme, prefix]) => {
-      const lines = colorConfig
-        .map(([key, itemConfig]) => {
-          const rawColor = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color
-          const color = sanitizeColor(rawColor)
-          return color ? `  --color-${key}: ${color};` : null
-        })
-        .filter(Boolean)
-        .join('\n')
-      if (!lines) return ''
-      return `${prefix} [data-chart=${id}] {\n${lines}\n}`
-    })
-    .filter(Boolean)
-    .join('\n')
-
-  if (!styleContent) return null
-
   return (
-    <style dangerouslySetInnerHTML={{ __html: styleContent }} />
+    <style
+      dangerouslySetInnerHTML={{
+        __html: Object.entries(THEMES)
+          .map(
+            ([theme, prefix]) => `
+${prefix} [data-chart=${id}] {
+${colorConfig
+  .map(([key, itemConfig]) => {
+    const color =
+      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+      itemConfig.color
+    return color ? `  --color-${key}: ${color};` : null
+  })
+  .join("\n")}
+}
+`
+          )
+          .join("\n"),
+      }}
+    />
   )
 }
-
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 

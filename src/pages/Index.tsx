@@ -21,7 +21,7 @@ const Index = () => {
   const [showEnrollmentForm, setShowEnrollmentForm] = useState(false);
   const [applications, setApplications] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast(); // kept for other notifications
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check authentication and get user
@@ -36,28 +36,26 @@ const Index = () => {
 
     getUser();
 
-const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-  setUser(session?.user ?? null);
-  if (session?.user) {
-    // Defer to avoid potential deadlocks
-    setTimeout(() => fetchApplications(session.user!.id), 0);
-  } else {
-    setApplications([]);
-  }
-  setIsLoading(false);
-});
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchApplications(session.user.id);
+      } else {
+        setApplications([]);
+      }
+      setIsLoading(false);
+    });
 
     return () => subscription.unsubscribe();
   }, []);
 
-const fetchApplications = async (userId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('enrollment_applications')
-      .select('id, application_status, student_first_name, student_last_name, student_grade, created_at')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-
+  const fetchApplications = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('enrollment_applications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setApplications(data || []);
@@ -66,17 +64,21 @@ const fetchApplications = async (userId: string) => {
     }
   };
 
-const handleSignOut = async () => {
-  try {
-    // Clean up auth state and attempt a global sign out
-    const { cleanupAuthState } = await import('@/utils/authCleanup');
-    cleanupAuthState();
-    try { await supabase.auth.signOut({ scope: 'global' }); } catch {}
-  } finally {
-    // Force page reload for a clean state
-    window.location.href = '/';
-  }
-};
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Sign Out Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed Out Successfully",
+        description: "You have been signed out of your account.",
+      });
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -151,10 +153,10 @@ const handleSignOut = async () => {
             variant="outline"
             onClick={handleSignOut}
             className="transition-smooth"
->
-  <LogOut className="w-4 h-4 mr-2" />
-  Sign Out
-</Button>
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
 
         {/* Dashboard Cards */}
