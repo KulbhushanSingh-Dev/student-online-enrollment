@@ -29,7 +29,7 @@ const relationships = [
 export const GuardianInfoStep: React.FC<GuardianInfoStepProps> = ({ data, updateData, errors }) => {
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Primary Guardian Section */}
+      {/* Primary Guardian */}
       <Card className="border border-primary/20 bg-gradient-card">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
