@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { cleanupAuthState } from '@/utils/authCleanup';
 
 export const AuthPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,49 +19,56 @@ export const AuthPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
+useEffect(() => {
+  // Set up auth state listener first
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (session?.user) {
+      // Defer any heavy work
+      setTimeout(() => {
         navigate('/');
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        navigate('/');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Sign In Failed",
-        description: error.message || "An error occurred during sign in.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      }, 0);
     }
-  };
+  });
+
+  // Then check for existing session
+  supabase.auth.getUser().then(({ data: { user } }) => {
+    if (user) navigate('/');
+  });
+
+  return () => subscription.unsubscribe();
+}, [navigate]);
+
+
+const handleSignIn = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+
+  try {
+    // Clean up any lingering auth state and attempt global sign-out
+    cleanupAuthState();
+    try { await supabase.auth.signOut({ scope: 'global' }); } catch {}
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+
+    toast({ title: 'Welcome back!', description: 'You have successfully signed in.' });
+    // Full refresh to ensure a clean state
+    window.location.href = '/';
+  } catch (error: any) {
+    toast({
+      title: 'Sign In Failed',
+      description: error.message || 'An error occurred during sign in.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,43 +84,46 @@ export const AuthPage: React.FC = () => {
 
     setIsLoading(true);
 
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl
-        }
-      });
+try {
+  const redirectUrl = `${window.location.origin}/`;
 
-      if (error) throw error;
+  // Clean up and attempt global sign-out before sign-up
+  cleanupAuthState();
+  try { await supabase.auth.signOut({ scope: 'global' }); } catch {}
+  
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: redirectUrl }
+  });
 
-      toast({
-        title: "Account Created Successfully",
-        description: "Please check your email to verify your account.",
-      });
+  if (error) throw error;
 
-      setActiveTab('signin');
-    } catch (error: any) {
-      if (error.message.includes('User already registered')) {
-        toast({
-          title: "Account Already Exists",
-          description: "This email is already registered. Please sign in instead.",
-          variant: "destructive",
-        });
-        setActiveTab('signin');
-      } else {
-        toast({
-          title: "Sign Up Failed",
-          description: error.message || "An error occurred during sign up.",
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  toast({
+    title: 'Account Created Successfully',
+    description: 'Please check your email to verify your account.',
+  });
+
+  setActiveTab('signin');
+} catch (error: any) {
+  if (error.message?.includes('User already registered')) {
+    toast({
+      title: 'Account Already Exists',
+      description: 'This email is already registered. Please sign in instead.',
+      variant: 'destructive',
+    });
+    setActiveTab('signin');
+  } else {
+    toast({
+      title: 'Sign Up Failed',
+      description: error.message || 'An error occurred during sign up.',
+      variant: 'destructive',
+    });
+  }
+} finally {
+  setIsLoading(false);
+}
+
   };
 
   return (
