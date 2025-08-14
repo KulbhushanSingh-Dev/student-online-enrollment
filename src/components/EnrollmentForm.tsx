@@ -9,6 +9,7 @@ import { ConfirmationStep } from './enrollment/ConfirmationStep';
 import { ChevronLeft, ChevronRight, GraduationCap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export interface EnrollmentData {
   // Student Information
@@ -103,6 +104,7 @@ export const EnrollmentForm: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check authentication
@@ -258,9 +260,10 @@ export const EnrollmentForm: React.FC = () => {
         description: "Your enrollment application has been submitted and is under review.",
       });
 
-      // Reset form
+      // Reset form and redirect to dashboard
       setData(initialData);
       setCurrentStep(0);
+      navigate('/');
     } catch (error) {
       console.error('Error submitting application:', error);
       toast({
